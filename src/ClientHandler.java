@@ -21,7 +21,7 @@ public class ClientHandler extends Thread {
             username = reader.readLine();
             clientHandlers.add(this);
 
-            broadcastMessage("SERVER", username + " joined the chat");
+            broadcastMessage("SERVER: " + username + " joined the chat");
 
         } catch (IOException e) {
             closeClient();
@@ -29,12 +29,12 @@ public class ClientHandler extends Thread {
         }
     }
 
-    private void broadcastMessage(String sender, String s) {
+    private void broadcastMessage(String s) {
         for (ClientHandler clientHandler : clientHandlers) {
             if (clientHandler == this) continue;
 
             try {
-                clientHandler.writer.write(sender + ": " + s + "\n");
+                clientHandler.writer.write(s + "\n");
                 clientHandler.writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -43,14 +43,12 @@ public class ClientHandler extends Thread {
     }
 
     private void closeClient() {
-        if (socket == null) return;
-
         removeClientHandler();
 
         try {
-            socket.close();
-            reader.close();
-            writer.close();
+            if (reader != null) reader.close();
+            if (writer != null) writer.close();
+            if (socket != null) socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,7 +56,7 @@ public class ClientHandler extends Thread {
 
     private void removeClientHandler() {
         clientHandlers.remove(this);
-        broadcastMessage("SERVER", username + " left the chat");
+        broadcastMessage("SERVER: " + username + " left the chat");
     }
 
     @Override
@@ -68,7 +66,7 @@ public class ClientHandler extends Thread {
         while (socket.isConnected()) {
             try {
                 message = reader.readLine();
-                broadcastMessage(username, message);
+                broadcastMessage(message);
             } catch (IOException e) {
                 closeClient();
                 throw new RuntimeException(e);

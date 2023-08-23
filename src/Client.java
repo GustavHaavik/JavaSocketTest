@@ -24,12 +24,10 @@ public class Client {
     }
 
     private void closeClient() {
-        if (socket == null) return;
-
         try {
-            socket.close();
-            reader.close();
-            writer.close();
+            if (reader != null) reader.close();
+            if (writer != null) writer.close();
+            if (socket != null) socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -66,18 +64,14 @@ public class Client {
         }).start();
     }
 
-    public static void main(String[] args) {
-        try {
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Enter your username: ");
-            String username = scanner.nextLine();
+    public static void main(String[] args) throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your username: ");
+        String username = scanner.nextLine();
 
-            Socket socket = new Socket("localhost", 9000);
-            Client client = new Client(socket, username);
-            client.listenForMessage();
-            client.sendMessage();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Socket socket = new Socket("localhost", 9000);
+        Client client = new Client(socket, username);
+        client.listenForMessage();
+        client.sendMessage();
     }
 }
